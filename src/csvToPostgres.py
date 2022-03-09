@@ -4,6 +4,11 @@ from sqlalchemy import create_engine
 from postgres_config import user, password, host, port
 
 
+'''
+Copies all data from CSV to Postgres table
+'''
+
+
 def isTableExists(cur, table_name):
     cur.execute(
         f'SELECT * FROM information_schema.tables where table_name=\'{table_name}\'')

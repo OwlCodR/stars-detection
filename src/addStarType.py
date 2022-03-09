@@ -4,6 +4,12 @@ import astropy.units as u
 import psycopg2
 from postgres_config import user, password, host, port
 
+
+'''
+Adds objects types to Postgres table from Simbad
+'''
+
+
 def main():
     customSimbad = Simbad()
     customSimbad.add_votable_fields('otype')
@@ -65,6 +71,7 @@ def main():
 
     cur.close()
     conn.close()
-    
+
+
 if __name__ == "__main__":
     main()

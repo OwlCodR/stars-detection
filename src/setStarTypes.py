@@ -5,12 +5,14 @@ from astropy.coordinates import Angle
 import psycopg2
 from postgres_config import user, password, host, port
 
+
 '''
 Sets stars' type from the VSX
 
 This file sets star's type to the postgres 
 table's column "starType"
 '''
+
 
 def main():
     catalog_list = Vizier.find_catalogs('VSX')
@@ -58,6 +60,7 @@ def main():
 
     con.commit()
     result.pprint()
+
 
 if __name__ == "__main__":
     main()
