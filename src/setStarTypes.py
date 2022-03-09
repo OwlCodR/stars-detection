@@ -3,7 +3,10 @@ import astropy.coordinates as coord
 import astropy.units as u
 from astropy.coordinates import Angle
 import psycopg2
+
 from postgres_config import user, password, host, port
+
+
 
 
 '''
@@ -23,14 +26,14 @@ def main():
 
     con = psycopg2.connect(user=user, password=password, host=host, port=port)
     cur = con.cursor()
-    cur.execute('SELECT "RAJ2000", "DEJ2000" FROM stars2;')
-    rows = cur.fetchall()
+    cur.execute(
+        'SELECT "index", "RAJ2000", "DEJ2000" FROM stars2;')
 
-    v = Vizier(columns=['Type'])
+    v = Vizier(columns=['Type', 'Name'])
     v.TIMEOUT = 5000
-
-    RAJs = []
-    DEJs = []
+    objects = []
+    
+    CHUNK_SIZE = 1000
     
     while True:
         row = cur.fetchone()
@@ -38,28 +41,48 @@ def main():
         if not row:
             break
         
-        RAJs.append(float(row[0]))
-        DEJs.append(float(row[1]))
+        index = int(row[0])
+        raj2000 = float(row[1])
+        dej2000 = float(row[2])
+                
+        objects.append([index, raj2000, dej2000])
+        
+    tables = []
 
-    result = v.query_region(coord.SkyCoord(ra=RAJs, dec=DEJs, unit=(u.deg, u.deg), frame='icrs'), 
-                            radius=5 * u.arcsec, catalog='B/vsx')
-    table = result[0]
+    for i in range(0, len(objects), CHUNK_SIZE):
+        chunk_objects = objects[i:(i + CHUNK_SIZE)]
+        
+        objects_ra = [object[1] for object in chunk_objects]
+        objects_dec = [object[2] for object in chunk_objects]
+        
+        result = v.query_region(coord.SkyCoord(ra=objects_ra, dec=objects_dec, unit=(u.deg, u.deg), frame='icrs'),
+                                radius=5 * u.arcsec, catalog='B/vsx')
+        if result:
+            tables.append(result[0])
+            print(f'APPEND\n {result[0]}\n')
 
-    print(table)
+    # print(f'TABLES {tables}')
+    
+    for j in range(len(tables)):
+        table = tables[j]
+        last_q = 0
+        for row in table:
+            q = row[0]
+            if q != last_q:
+                last_q = q
+                # print(f'UPDATE stars2 SET "starType"="{row[1]}" WHERE index={objects[q + j * CHUNK_SIZE - 1][0]};')
+                
+                cur.execute(
+                    f'UPDATE stars2 SET "starType"={table[i][1]} WHERE id={q + j * CHUNK_SIZE}')
 
-    last_q = 0
-    for i in range(len(table)):
-        q = table[i][0]
-        if q != last_q:
-            last_q = q
-            cur.execute(f'UPDATE stars2 SET "starType"={table[i][1]}')
-
-        if i % 1000 == 0:
-            print(q)
-            con.commit()
+            if i % 1000 == 0:
+                print(q + j * CHUNK_SIZE)
+                con.commit()
 
     con.commit()
-    result.pprint()
+    
+    cur.close()
+    con.close()
 
 
 if __name__ == "__main__":
