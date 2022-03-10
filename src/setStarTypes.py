@@ -3,10 +3,8 @@ import astropy.coordinates as coord
 import astropy.units as u
 from astropy.coordinates import Angle
 import psycopg2
-
+import numpy
 from postgres_config import user, password, host, port
-
-
 
 
 '''
@@ -27,13 +25,13 @@ def main():
     con = psycopg2.connect(user=user, password=password, host=host, port=port)
     cur = con.cursor()
     cur.execute(
-        'SELECT "index", "RAJ2000", "DEJ2000" FROM stars2;')
+        'SELECT "index", "RAJ2000", "DEJ2000" FROM stars2 WHERE index < 500000;')
 
-    v = Vizier(columns=['Type', 'Name'])
+    v = Vizier(columns=['Type', 'Name', 'min', 'max', 'n_max', 'f_min', 'V', 'Period'])
     v.TIMEOUT = 5000
     objects = []
     
-    CHUNK_SIZE = 1000
+    CHUNK_SIZE = 10000
     
     while True:
         row = cur.fetchone()
@@ -57,26 +55,54 @@ def main():
         
         result = v.query_region(coord.SkyCoord(ra=objects_ra, dec=objects_dec, unit=(u.deg, u.deg), frame='icrs'),
                                 radius=5 * u.arcsec, catalog='B/vsx')
-        if result:
-            tables.append(result[0])
-            print(f'APPEND\n {result[0]}\n')
-
-    # print(f'TABLES {tables}')
-    
-    for j in range(len(tables)):
-        table = tables[j]
-        last_q = 0
-        for row in table:
+        
+        last_q = 0    
+        for row in result[0]:
             q = row[0]
             if q != last_q:
                 last_q = q
-                # print(f'UPDATE stars2 SET "starType"="{row[1]}" WHERE index={objects[q + j * CHUNK_SIZE - 1][0]};')
+                
+                period = None
+                
+                if str(row[8]) != '--':
+                    period = row[8]
+                
+                # print(f'''UPDATE stars2 SET 
+                #     "starType"=%s,
+                #     "sName"=%s,
+                #     "min"=%s,
+                #     "max"=%s, 
+                #     "n_max"=%s,
+                #     "f_min"=%s,
+                #     "V"=%s,
+                #     "Period"=%s
+                #     WHERE index=%s;''',
+                #     (
+                #         row[1], row[2], float(row[3]), float(row[4]), 
+                #         row[5], row[6], int(row[7]), period,
+                #         objects[q + i - 1][0]
+                #     ))
                 
                 cur.execute(
-                    f'UPDATE stars2 SET "starType"={table[i][1]} WHERE id={q + j * CHUNK_SIZE}')
+                    f'''UPDATE stars2 SET 
+                    "starType"=%s,
+                    "sName"=%s,
+                    "min"=%s,
+                    "max"=%s, 
+                    "n_max"=%s,
+                    "f_min"=%s,
+                    "V"=%s,
+                    "Period"=%s
+                    WHERE index=%s;''',
+                    (
+                        row[1], row[2], float(row[3]), float(row[4]), 
+                        row[5], row[6], int(row[7]), period,
+                        objects[q + i - 1][0]
+                    )
+                )
 
             if i % 1000 == 0:
-                print(q + j * CHUNK_SIZE)
+                print(q + i - 1)
                 con.commit()
 
     con.commit()
