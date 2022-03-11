@@ -102,7 +102,7 @@ def main():
                 )
 
             if i % 1000 == 0:
-                print(q + i - 1)
+                print(i + (q - 1))
                 con.commit()
 
     con.commit()
