@@ -25,7 +25,7 @@ def main():
     con = psycopg2.connect(user=user, password=password, host=host, port=port)
     cur = con.cursor()
     cur.execute(
-        'SELECT "index", "RAJ2000", "DEJ2000" FROM stars2 WHERE index < 500000;')
+        'SELECT "index", "RAJ2000", "DEJ2000" FROM stars2 WHERE index > 500000;')
 
     v = Vizier(columns=['Type', 'Name', 'min', 'max', 'n_max', 'f_min', 'V', 'Period'])
     v.TIMEOUT = 5000
