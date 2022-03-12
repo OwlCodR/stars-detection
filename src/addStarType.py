@@ -33,7 +33,9 @@ def main():
     cur = con.cursor()
     print('Done!\n')
 
-    cur.execute(f'SELECT "index", "RAJ2000", "DEJ2000" FROM {TABLE_NAME} WHERE index BETWEEN {START_INDEX} AND {END_INDEX};')
+    # cur.execute(f'SELECT "index", "RAJ2000", "DEJ2000" FROM {TABLE_NAME} WHERE index BETWEEN {START_INDEX} AND {END_INDEX};')
+    cur.execute(
+        f'SELECT "index", "RAJ2000", "DEJ2000" FROM {TABLE_NAME} WHERE index > {END_INDEX};')
 
     objects = [] # [[index, raj2000, dej2000], ..]
 

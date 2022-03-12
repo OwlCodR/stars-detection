@@ -45,8 +45,6 @@ def main():
                 
         objects.append([index, raj2000, dej2000])
         
-    tables = []
-
     for i in range(0, len(objects), CHUNK_SIZE):
         chunk_objects = objects[i:(i + CHUNK_SIZE)]
         
