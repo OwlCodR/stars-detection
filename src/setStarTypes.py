@@ -16,14 +16,11 @@ table's column "starType"
 
 
 def main():
-    catalog_list = Vizier.find_catalogs('VSX')
-    print(f'Catalog_list:\n {catalog_list}')
-
-    vsx = Vizier.get_catalogs(catalog_list.values())[0]
-    print(f'VSX:\n {vsx}')
-
+    print('Connecting to database...')
     con = psycopg2.connect(user=user, password=password, host=host, port=port)
     cur = con.cursor()
+    print('Done!')
+
     cur.execute(
         'SELECT "index", "RAJ2000", "DEJ2000" FROM stars2 WHERE index > 500000;')
 
@@ -33,6 +30,7 @@ def main():
     
     CHUNK_SIZE = 10000
     
+    print('Loading objects...')
     while True:
         row = cur.fetchone()
         
@@ -44,6 +42,7 @@ def main():
         dej2000 = float(row[2])
                 
         objects.append([index, raj2000, dej2000])
+    print('Done!')
         
     for i in range(0, len(objects), CHUNK_SIZE):
         chunk_objects = objects[i:(i + CHUNK_SIZE)]
@@ -51,8 +50,10 @@ def main():
         objects_ra = [object[1] for object in chunk_objects]
         objects_dec = [object[2] for object in chunk_objects]
         
+        print('Requesting objects...')
         result = v.query_region(coord.SkyCoord(ra=objects_ra, dec=objects_dec, unit=(u.deg, u.deg), frame='icrs'),
                                 radius=5 * u.arcsec, catalog='B/vsx')
+        print('Done!')
         
         last_q = 0    
         for row in result[0]:
