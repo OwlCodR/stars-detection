@@ -9,24 +9,23 @@ Copies all data from CSV to Postgres table
 '''
 
 
-def isTableExists(cur, table_name):
-    cur.execute(
-        f'SELECT * FROM information_schema.tables where table_name=\'{table_name}\'')
-    return bool(cur.rowcount)
-
-
 def main():
     CSV_PATH = 'C:\Download\APASSDR9_GALEXGR6PLUS7AIS.csv'
     TABLE_NAME = 'stars2'
 
+    print('Connecting to database...')
     con = psycopg2.connect(
         user=user, password=password, host=host, port=port)
+    print('Done!')
 
     df = pandas.read_csv(CSV_PATH)
 
     engine = create_engine(
         f'postgresql://{user}:{password}@{host}:{port}/postgres')
+    
+    print('Parsing into postgres...')
     df.to_sql(TABLE_NAME, engine)
+    print('Done!')
 
     con.close()
 
