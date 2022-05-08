@@ -1,4 +1,6 @@
 from postgres_config import user, password, host, port
+from starsDetection import classify
+from starsDetection import setRatio
 
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
@@ -11,55 +13,14 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn import preprocessing
 
 import psycopg2
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-def classify(classifiers, names, X_train, X_test, y_train, y_test):
-    best_accuracy = 0
-    best_classifier_name = ''
-
-    for classifier, name in zip(classifiers, names):
-        classifier.fit(X_train, y_train)
-
-        prediction = classifier.predict(X_test)
-        accuracy = accuracy_score(prediction, y_test)
-
-        print(name)
-        print(classification_report(prediction, y_test))
-
-        if accuracy > best_accuracy:
-            best_accuracy = accuracy
-            best_classifier_name = name
-        
-    print('Best accuracy:', best_classifier_name, best_accuracy)
-
-
-# Use it to balance stars count
-def setRatio(df, column, ratio, isAscending = True):
-    """
-    Returns dataframe with stars ratio 
-    that says how many times the number of 
-    stars will exceed the number of other objects
-    """
-
-    notStarsCount = len(df[column].loc[df[column] == 0].index)
-    starsCount = len(df[column].loc[df[column] == 1].index)
-
-    minimum = min(notStarsCount, starsCount)
-
-    print('notStarsCount:', notStarsCount)
-    print('starsCount:', starsCount)
-
-    df = df.sort_values(column, ascending=isAscending)
-
-    print('Shape before setting ratio:', df.shape)
-    df = df.drop(df.index[minimum + minimum * ratio:])
-    print('Shape after setting ratio:', df.shape)
-
-    return df
+import re
 
 def main():
     table_name = 'stars3'
@@ -68,33 +29,42 @@ def main():
     con = psycopg2.connect(user=user, password=password, host=host, port=port)
     print('Done!')
 
-    # sql = f'''SELECT "FUVmag", "e_FUVmag", "NUVmag", "e_NUVmag", "Vmag", "e_Vmag", "Bmag", "e_Bmag", "otype" FROM {table_name}'''
+    simbad_vstar_types = [
+        'V\*', 'Irregular_V\*', 'Orion_V\*', 'Eruptive\*', 'Erupt\*RCrB', 'RCrB_Candidate', 'RotV\*', 'RotV\*alf2CVn', 'Pulsar', 'BYDra', 'RSCVn', 'PulsV\*', 'RRLyr', 'Cepheid', 'PulsV\*delSct', 'PulsV\*RVTau', 'PulsV\*WVir', 'PulsV\*bCep', 'deltaCep', 'gammaDor', 'pulsV\*SX', 'LPV\*', 'Mira', 'SN'
+    ]
 
-    sql = f'''SELECT "FUVmag", "e_FUVmag", "NUVmag", "e_NUVmag", "Vmag", "e_Vmag", "Bmag", "e_Bmag", "otype" FROM {table_name}'''
+    # TODO: Try to add candidates too
+    regExp = f"^({'|'.join(simbad_vstar_types)})$"
+    print(regExp)
+
+    vstars_pattern = re.compile(regExp)
+
+    sql = f'''SELECT "FUVmag", "e_FUVmag", "NUVmag", "e_NUVmag", "Vmag", "e_Vmag", "Bmag", "e_Bmag", "starType", "otype" FROM {table_name}'''
 
     df = pd.read_sql_query(sql, con)
     print('Table:\n', df)
 
-    df['isStar'] = np.where(
-        (df['otype'] == 'Star') | (df['otype'].str.contains('\*') == True), 1, 0)
-    
-    df = setRatio(df, 'isStar', 1)
+    df['isVariableStar'] = np.where(
+        (df['starType'].isnull() == False) | (df['otype'].str.match(vstars_pattern) == True), 1, 0)
 
-    df_features = df[df.columns[:-2]]
+    df = setRatio(df, 'isVariableStar', 1, False)
+
+    df_features = df[df.columns[:-3]]
     print('Features:\n', df_features)
 
-    df_labels = df['isStar']
+    df_labels = df['isVariableStar']
     print('Labels:\n', df_labels)
 
     plt.title("Stars")
     df_labels.hist()
     plt.show()
 
-    X_train, X_test, y_train, y_test = train_test_split(df_features, df_labels, test_size=0.2)
+    X_train, X_test, y_train, y_test = train_test_split(
+        df_features, df_labels, test_size=0.2)
 
     print('Train dataset: ', X_train.shape, y_train.shape)
     print('Test dataset: ', X_test.shape, y_test.shape)
-    
+
     names = [
         "Nearest Neighbors",
         "Linear SVM",
