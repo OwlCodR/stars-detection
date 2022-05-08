@@ -40,3 +40,100 @@
 | [min](https://vizier.cds.unistra.fr/viz-bin/VizieR-3?-source=B/vsx/vsx) | Magnitude at minimum, or amplitude | 0.10999999940395355 |
 | [max](https://vizier.cds.unistra.fr/viz-bin/VizieR-3?-source=B/vsx/vsx) | Magnitude at maximum, or amplitude | 13.399999618530273 |
 | [Period](https://vizier.cds.unistra.fr/viz-bin/VizieR-3?-source=B/vsx/vsx) | Period of the variable in days | 0.290016 |
+
+## 📊 Metrics of classifiers
+```
+Train dataset:  (6683, 8) (6683,)
+Test dataset:  (1671, 8) (1671,)
+Nearest Neighbors
+              precision    recall  f1-score   support
+
+           0       0.95      0.97      0.96       818
+           1       0.97      0.95      0.96       853
+
+    accuracy                           0.96      1671
+   macro avg       0.96      0.96      0.96      1671
+weighted avg       0.96      0.96      0.96      1671
+
+Linear SVM
+              precision    recall  f1-score   support
+
+           0       0.94      0.97      0.96       811
+           1       0.97      0.94      0.96       860
+
+    accuracy                           0.96      1671
+   macro avg       0.96      0.96      0.96      1671
+weighted avg       0.96      0.96      0.96      1671
+
+RBF SVM
+              precision    recall  f1-score   support
+
+           0       0.95      0.97      0.96       816
+           1       0.97      0.95      0.96       855
+
+    accuracy                           0.96      1671
+   macro avg       0.96      0.96      0.96      1671
+weighted avg       0.96      0.96      0.96      1671
+
+Decision Tree
+              precision    recall  f1-score   support
+
+           0       0.96      0.97      0.96       828
+           1       0.97      0.96      0.96       843
+
+    accuracy                           0.96      1671
+   macro avg       0.96      0.96      0.96      1671
+weighted avg       0.96      0.96      0.96      1671
+
+Random Forest
+              precision    recall  f1-score   support
+
+           0       0.95      0.97      0.96       817
+           1       0.97      0.95      0.96       854
+
+    accuracy                           0.96      1671
+   macro avg       0.96      0.96      0.96      1671
+weighted avg       0.96      0.96      0.96      1671
+
+Neural Net
+              precision    recall  f1-score   support
+
+           0       0.94      0.98      0.96       801
+           1       0.98      0.94      0.96       870
+
+    accuracy                           0.96      1671
+   macro avg       0.96      0.96      0.96      1671
+weighted avg       0.96      0.96      0.96      1671
+
+AdaBoost
+              precision    recall  f1-score   support
+
+           0       0.95      0.97      0.96       821
+           1       0.97      0.95      0.96       850
+
+    accuracy                           0.96      1671
+   macro avg       0.96      0.96      0.96      1671
+weighted avg       0.96      0.96      0.96      1671
+
+Naive Bayes
+              precision    recall  f1-score   support
+
+           0       0.94      0.97      0.95       811
+           1       0.97      0.94      0.95       860
+
+    accuracy                           0.95      1671
+   macro avg       0.95      0.95      0.95      1671
+weighted avg       0.95      0.95      0.95      1671
+
+QDA
+              precision    recall  f1-score   support
+
+           0       0.94      0.97      0.95       806
+           1       0.97      0.94      0.96       865
+
+    accuracy                           0.96      1671
+   macro avg       0.96      0.96      0.96      1671
+weighted avg       0.96      0.96      0.96      1671
+
+Best accuracy: Decision Tree 0.9622980251346499
+```
