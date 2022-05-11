@@ -1,3 +1,6 @@
+# Copyright (c) 2022 OwlCodR (Max)
+# https://github.com/OwlCodR
+
 from astroquery.vizier import Vizier
 import astropy.coordinates as coord
 import astropy.units as u
@@ -55,7 +58,7 @@ def main():
                                 radius=5 * u.arcsec, catalog='B/vsx')
         print('Done!')
         
-        last_q = 0    
+        last_q = 0
         for row in result[0]:
             q = row[0]
             if q != last_q:

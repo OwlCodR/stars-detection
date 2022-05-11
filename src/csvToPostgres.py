@@ -1,3 +1,6 @@
+# Copyright (c) 2022 OwlCodR (Max)
+# https://github.com/OwlCodR
+
 import psycopg2
 import pandas
 from sqlalchemy import create_engine

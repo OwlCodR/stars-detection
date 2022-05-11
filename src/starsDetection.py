@@ -1,3 +1,6 @@
+# Copyright (c) 2022 OwlCodR (Max)
+# https://github.com/OwlCodR
+
 from postgres_config import user, password, host, port
 
 from sklearn.metrics import accuracy_score
