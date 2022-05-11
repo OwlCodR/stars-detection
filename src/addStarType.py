@@ -1,3 +1,6 @@
+# Copyright (c) 2022 OwlCodR (Max)
+# https://github.com/OwlCodR
+
 from astroquery.simbad import Simbad
 import astropy.coordinates as coord
 import astropy.units as u
