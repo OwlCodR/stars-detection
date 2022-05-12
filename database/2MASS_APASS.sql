@@ -2,7 +2,7 @@ CREATE ROLE star_admin WITH CREATEDB LOGIN PASSWORD 'stars';
 CREATE DATABASE star_db OWNER star_admin;
 
 CREATE TABLE sky_2MASS_APASS_01_with_VSX_type (
-  id BIGSERIAL PRIMARY KEY,
+  id BIGINT PRIMARY KEY,
   angDist double precision,
   RAJ2000 double precision,
   DEJ2000 double precision,
@@ -27,3 +27,6 @@ CREATE TABLE sky_2MASS_APASS_01_with_VSX_type (
   ipmag real,
   e_ipmag real,
 );
+
+GRANT SELECT, INSERT, DELETE, UPDATE ON sky_2MASS_APASS_01_with_VSX_type TO star_admin;
+GRANT ALL ON SEQUENCE sky_2MASS_APASS_01_with_VSX_type_id_seq TO star_admin;

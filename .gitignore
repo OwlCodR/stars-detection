@@ -1,3 +1,6 @@
 datasets
 postgres_config.py
 __pycache__
+
+*.dat
+.DS_Store
