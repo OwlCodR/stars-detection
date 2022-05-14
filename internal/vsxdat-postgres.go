@@ -72,7 +72,7 @@ func Parse() error {
 	defer db.Close()
 
 	// open vsx.dat file
-	file, err := os.Open("../databases/vsx.dat")
+	file, err := os.Open("../database/vsx.dat")
 	if err != nil {
 		return err
 	}
@@ -90,6 +90,8 @@ func Parse() error {
 	var line vsxdat_line
 	var str string
 	i := 0
+	j := 0
+	k := 0
 	var danger bool = true // danger state when we are in the cicle for defer function
 	defer func() {
 		if danger {
@@ -98,12 +100,20 @@ func Parse() error {
 			fmt.Println(fmt.Sprintf("Parsed %d lines", i))
 		}
 	}()
+
 	for scanner.Scan() {
-		if len(scanner.Text()) < 139 {
+		// if i == 10 {
+		// 	break
+		// }
+
+		str_line := []byte(scanner.Text())
+
+		if len(scanner.Text()) < 94 {
 			i += 1
+			k += 1
+
 			continue
 		}
-		str_line := []byte(scanner.Text())
 
 		// values
 		str = strings.ReplaceAll(strings.ReplaceAll(string(str_line[0:7]), " ", ""), "\x00", "")
@@ -116,7 +126,7 @@ func Parse() error {
 			return err
 		}
 
-		line.Name = string(str_line[8:38])
+		line.Name = strings.ReplaceAll(strings.ReplaceAll(string(str_line[8:38]), " ", ""), "\x00", "")
 
 		str = strings.ReplaceAll(strings.ReplaceAll(string(str_line[39]), " ", ""), "\x00", "")
 		if str == "" {
@@ -148,7 +158,24 @@ func Parse() error {
 			return err
 		}
 
-		line.Type = string(str_line[61:91])
+		line.Type = strings.ReplaceAll(strings.ReplaceAll(string(str_line[61:91]), " ", ""), "\x00", "")
+
+		if len(scanner.Text()) < 139 {
+			i += 1
+			j += 1
+
+			// _, err = db.Exec(fmt.Sprintf("INSERT INTO vsx_dat_stars (oid, name, v, radeg, dedeg, type) "+
+			// 	"VALUES (%d, '%s', %d, %.6f, %.6f, '%s');",
+			// 	line.OID,
+			// 	line.Name,
+			// 	line.V,
+			// 	line.RAdeg,
+			// 	line.DEdeg,
+			// 	line.Type,
+			// ))
+
+			continue
+		}
 
 		str = strings.ReplaceAll(strings.ReplaceAll(string(str_line[139:155]), " ", ""), "\x00", "")
 		if str == "" {
@@ -160,17 +187,17 @@ func Parse() error {
 			return err
 		}
 
-		if i == 500 {
-			fmt.Println(line.OID)
-			fmt.Println(line.Name)
-			fmt.Println(line.V)
-			fmt.Println(line.RAdeg)
-			fmt.Println(line.DEdeg)
-			fmt.Println(line.Type)
-			fmt.Println(line.Period)
-		}
+		// if i == 500 {
+		// 	fmt.Println(line.OID)
+		// 	fmt.Println(line.Name)
+		// 	fmt.Println(line.V)
+		// 	fmt.Println(line.RAdeg)
+		// 	fmt.Println(line.DEdeg)
+		// 	fmt.Println(line.Type)
+		// 	fmt.Println(line.Period)
+		// }
 
-		// _, err = db.Exec(fmt.Sprintf("INSERT INTO vsx_dat_stars (oid, name, v, redeg, dedeg, type, period) "+
+		// _, err = db.Exec(fmt.Sprintf("INSERT INTO vsx_dat_stars (oid, name, v, radeg, dedeg, type, period) "+
 		// 	"VALUES (%d, '%s', %d, %.6f, %.6f, '%s', %.8f);",
 		// 	line.OID,
 		// 	line.Name,
@@ -187,6 +214,9 @@ func Parse() error {
 		return err
 	}
 	danger = false
+
+	fmt.Println("Without period", j, "lines")
+	fmt.Println("Drop", k, "lines")
 
 	return nil
 }
