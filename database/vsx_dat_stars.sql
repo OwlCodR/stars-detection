@@ -1,6 +1,6 @@
 CREATE TABLE vsx_dat_stars (
   id BIGSERIAL PRIMARY KEY,
-  oid BIGINT,
+  oid BIGINT UNIQUE NOT NULL,
   name TEXT,
   v INT,
   radeg DOUBLE PRECISION,

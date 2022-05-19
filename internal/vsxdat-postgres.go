@@ -57,7 +57,7 @@ type vsxdat_line struct {
 	Period float64
 }
 
-func Parse() error {
+func Parse(start_index int, end_index int) error {
 	// open database
 	db, err := sql.Open("postgres",
 		fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
@@ -90,6 +90,7 @@ func Parse() error {
 	var line vsxdat_line
 	var str string
 	i := 0
+	counter := 0
 	j := 0
 	k := 0
 	var danger bool = true // danger state when we are in the cicle for defer function
@@ -97,14 +98,19 @@ func Parse() error {
 		if danger {
 			fmt.Println(fmt.Sprintf("Debug info string number %d, str = '%s'.", i, str), []byte(str))
 		} else {
-			fmt.Println(fmt.Sprintf("Parsed %d lines", i))
+			fmt.Println(fmt.Sprintf("Parsed %d lines", counter))
 		}
 	}()
 
 	for scanner.Scan() {
-		// if i == 10 {
-		// 	break
-		// }
+		if i < start_index {
+			i += 1
+			continue
+		}
+
+		if i > end_index {
+			break
+		}
 
 		str_line := []byte(scanner.Text())
 
@@ -164,15 +170,16 @@ func Parse() error {
 			i += 1
 			j += 1
 
-			// _, err = db.Exec(fmt.Sprintf("INSERT INTO vsx_dat_stars (oid, name, v, radeg, dedeg, type) "+
-			// 	"VALUES (%d, '%s', %d, %.6f, %.6f, '%s');",
-			// 	line.OID,
-			// 	line.Name,
-			// 	line.V,
-			// 	line.RAdeg,
-			// 	line.DEdeg,
-			// 	line.Type,
-			// ))
+			_, err = db.Exec(fmt.Sprintf("INSERT INTO vsx_dat_stars (oid, name, v, radeg, dedeg, type) "+
+				"VALUES (%d, '%s', %d, %.6f, %.6f, '%s');",
+				line.OID,
+				line.Name,
+				line.V,
+				line.RAdeg,
+				line.DEdeg,
+				line.Type,
+			))
+			counter += 1
 
 			continue
 		}
@@ -197,16 +204,18 @@ func Parse() error {
 		// 	fmt.Println(line.Period)
 		// }
 
-		// _, err = db.Exec(fmt.Sprintf("INSERT INTO vsx_dat_stars (oid, name, v, radeg, dedeg, type, period) "+
-		// 	"VALUES (%d, '%s', %d, %.6f, %.6f, '%s', %.8f);",
-		// 	line.OID,
-		// 	line.Name,
-		// 	line.V,
-		// 	line.RAdeg,
-		// 	line.DEdeg,
-		// 	line.Type,
-		// 	line.Period,
-		// ))
+		_, err = db.Exec(fmt.Sprintf("INSERT INTO vsx_dat_stars (oid, name, v, radeg, dedeg, type, period) "+
+			"VALUES (%d, '%s', %d, %.6f, %.6f, '%s', %.8f);",
+			line.OID,
+			line.Name,
+			line.V,
+			line.RAdeg,
+			line.DEdeg,
+			line.Type,
+			line.Period,
+		))
+
+		counter += 1
 
 		i += 1
 	}
@@ -222,7 +231,16 @@ func Parse() error {
 }
 
 func main() {
-	err := Parse()
+	args := os.Args
+
+	if len(args) < 3 {
+		fmt.Println("Not enough arguments.")
+		return
+	}
+	start_index, _ := strconv.Atoi(args[1])
+	end_index, _ := strconv.Atoi(args[2])
+
+	err := Parse(start_index, end_index)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
