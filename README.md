@@ -16,7 +16,7 @@
     - Basics of astronomy
     - Variable stars classification
     - Coordinate systems and units
-    - etc
+    - Etc
 
 ## Info about database
 > We use database which is the result of crossing [APASS DR9](https://vizier.cds.unistra.fr/viz-bin/VizieR-3?-source=II/336/apass9) and [GALEX AIS GR6+7](https://vizier.u-strasbg.fr/viz-bin/VizieR-3?-source=II/335/galex_ais) by [X-Macth](http://cdsxmatch.u-strasbg.fr/). 
